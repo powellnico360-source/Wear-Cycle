@@ -23,6 +23,7 @@ import com.chichi.project.ui.screens.RequestScreen
 import com.chichi.project.ui.screens.SelectionScreen
 import com.chichi.project.ui.screens.SignUpScreen
 import com.chichi.project.ui.screens.SplashScreen
+import com.chichi.project.ui.screens.SuccessScreen
 import com.chichi.project.ui.theme.PROJECTTheme
 
 class MainActivity : ComponentActivity() {
@@ -125,14 +126,36 @@ fun AppNavigation(
         }
         composable("donate") {
             DonateScreen(
-                onDonateSubmitted = { navController.popBackStack() },
+                onDonateSubmitted = { 
+                    navController.navigate("donation_success") {
+                        popUpTo("selection") 
+                    }
+                },
                 requestLocationPermission = requestLocationPermission
+            )
+        }
+        composable("donation_success") {
+            SuccessScreen(
+                title = "Donation Received!",
+                message = "Thank you for your generosity! Your donation has been posted and will help someone in need.",
+                onContinue = { navController.popBackStack("selection", inclusive = false) }
             )
         }
         composable("request") {
             RequestScreen(
-                onRequestSubmitted = { navController.popBackStack() },
+                onRequestSubmitted = { 
+                    navController.navigate("request_success") {
+                        popUpTo("selection")
+                    }
+                },
                 requestLocationPermission = requestLocationPermission
+            )
+        }
+        composable("request_success") {
+            SuccessScreen(
+                title = "Request Submitted!",
+                message = "Your request has been posted successfully. Others can now see what you need on the map.",
+                onContinue = { navController.popBackStack("selection", inclusive = false) }
             )
         }
         composable("map") {

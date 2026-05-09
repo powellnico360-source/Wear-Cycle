@@ -3,7 +3,9 @@ package com.chichi.project.ui.screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.LocationOn
@@ -12,13 +14,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 
 @Composable
 fun SelectionScreen(
@@ -33,7 +38,7 @@ fun SelectionScreen(
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        MaterialTheme.colorScheme.primaryContainer,
+                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
                         MaterialTheme.colorScheme.background
                     )
                 )
@@ -42,18 +47,21 @@ fun SelectionScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp),
+                .padding(24.dp)
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Icon(
-                imageVector = Icons.Default.ShoppingBag,
-                contentDescription = null,
-                modifier = Modifier.size(80.dp),
-                tint = MaterialTheme.colorScheme.primary
+            AsyncImage(
+                model = "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?q=80&w=1000&auto=format&fit=crop",
+                contentDescription = "Recycling Concept",
+                modifier = Modifier
+                    .size(120.dp)
+                    .clip(RoundedCornerShape(20.dp)),
+                contentScale = ContentScale.Crop
             )
             
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             Text(
                 text = "Wear Cycle",
@@ -75,7 +83,7 @@ fun SelectionScreen(
             SelectionCard(
                 title = "Donate Clothes",
                 subtitle = "Share what you no longer need",
-                icon = Icons.Default.Add,
+                imageUrl = "https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?q=80&w=500&auto=format&fit=crop",
                 onClick = onDonateSelected,
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
@@ -86,7 +94,7 @@ fun SelectionScreen(
             SelectionCard(
                 title = "Request Clothes",
                 subtitle = "Find something for yourself",
-                icon = Icons.Default.ShoppingBag,
+                imageUrl = "https://images.unsplash.com/photo-1445205174225-4a7bc1a3089c?q=80&w=500&auto=format&fit=crop",
                 onClick = onRequestSelected,
                 containerColor = MaterialTheme.colorScheme.secondary,
                 contentColor = MaterialTheme.colorScheme.onSecondary
@@ -97,7 +105,7 @@ fun SelectionScreen(
             SelectionCard(
                 title = "Browse Items",
                 subtitle = "See what's available for you",
-                icon = Icons.Default.LocationOn,
+                imageUrl = "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?q=80&w=500&auto=format&fit=crop",
                 onClick = onBrowseItemsSelected,
                 containerColor = MaterialTheme.colorScheme.tertiary,
                 contentColor = MaterialTheme.colorScheme.onTertiary
@@ -125,7 +133,7 @@ fun SelectionScreen(
 fun SelectionCard(
     title: String,
     subtitle: String,
-    icon: ImageVector,
+    imageUrl: String,
     onClick: () -> Unit,
     containerColor: Color,
     contentColor: Color
@@ -134,34 +142,39 @@ fun SelectionCard(
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .height(100.dp),
-        shape = RoundedCornerShape(20.dp),
+            .height(110.dp),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
             containerColor = containerColor,
             contentColor = contentColor
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
+            modifier = Modifier.fillMaxSize(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
+            AsyncImage(
+                model = imageUrl,
+                contentDescription = null,
                 modifier = Modifier
-                    .size(56.dp)
-                    .background(contentColor.copy(alpha = 0.2f), RoundedCornerShape(12.dp)),
-                contentAlignment = Alignment.Center
+                    .width(100.dp)
+                    .fillMaxHeight(),
+                contentScale = ContentScale.Crop
+            )
+            
+            Column(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .weight(1f)
             ) {
-                Icon(icon, contentDescription = null, modifier = Modifier.size(32.dp))
-            }
-            
-            Spacer(modifier = Modifier.width(16.dp))
-            
-            Column {
-                Text(text = title, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                Text(text = subtitle, fontSize = 14.sp, color = contentColor.copy(alpha = 0.8f))
+                Text(text = title, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    text = subtitle, 
+                    fontSize = 13.sp, 
+                    color = contentColor.copy(alpha = 0.85f),
+                    lineHeight = 16.sp
+                )
             }
         }
     }

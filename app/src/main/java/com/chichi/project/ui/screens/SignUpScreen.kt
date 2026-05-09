@@ -25,6 +25,10 @@ import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
 import kotlinx.coroutines.launch
 
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
+import androidx.compose.ui.draw.clip
+
 @Composable
 fun SignUpScreen(
     onNavigateToLogin: () -> Unit,
@@ -52,11 +56,14 @@ fun SignUpScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Icon(
-                imageVector = Icons.Default.Recycling,
-                contentDescription = null,
-                modifier = Modifier.size(80.dp),
-                tint = MaterialTheme.colorScheme.primary
+            AsyncImage(
+                model = "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?q=80&w=1000&auto=format&fit=crop",
+                contentDescription = "Sustainable Clothing",
+                modifier = Modifier
+                    .size(140.dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .padding(bottom = 16.dp),
+                contentScale = ContentScale.Crop
             )
             
             Text(

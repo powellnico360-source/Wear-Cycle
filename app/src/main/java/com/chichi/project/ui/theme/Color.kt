@@ -2,15 +2,20 @@ package com.chichi.project.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val GreenPrimary = Color(0xFF2E7D32)
-val GreenSecondary = Color(0xFF4CAF50)
-val GreenTertiary = Color(0xFF81C784)
+// Muted Vibrant Warm Palette
+val Terracotta = Color(0xFFBC5148)
+val GoldenOak = Color(0xFFD48C45)
+val WarmSage = Color(0xFF587D71)
 
-val GreenDarkPrimary = Color(0xFF1B5E20)
-val GreenDarkSecondary = Color(0xFF2E7D32)
-val GreenDarkTertiary = Color(0xFF455A64)
+val TerracottaLight = Color(0xFFE58B82)
+val GoldenOakLight = Color(0xFFE6B07E)
+val WarmSageLight = Color(0xFFA3BDB5)
 
-val BackgroundLight = Color(0xFFF1F8E9)
-val SurfaceLight = Color(0xFFFFFFFF)
+val BackgroundWarmLight = Color(0xFFFFF8F0) // Soft Cream
+val SurfaceWarmLight = Color(0xFFFFFFFF)
 
-val Pink80 = Color(0xFFEFB8C8)
+val BackgroundWarmDark = Color(0xFF1B1B1B)
+val SurfaceWarmDark = Color(0xFF242424)
+
+val OnBackgroundLight = Color(0xFF3E2723)
+val OnBackgroundDark = Color(0xFFECE0D1)
