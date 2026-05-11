@@ -20,6 +20,7 @@ import com.chichi.project.ui.screens.ForgotPasswordScreen
 import com.chichi.project.ui.screens.LoginScreen
 import com.chichi.project.ui.screens.MapScreen
 import com.chichi.project.ui.screens.RequestScreen
+import com.chichi.project.ui.screens.RequestedItemsScreen
 import com.chichi.project.ui.screens.SelectionScreen
 import com.chichi.project.ui.screens.SignUpScreen
 import com.chichi.project.ui.screens.SplashScreen
@@ -115,11 +116,18 @@ fun AppNavigation(
                 onDonateSelected = { navController.navigate("donate") },
                 onRequestSelected = { navController.navigate("request") },
                 onViewMapSelected = { navController.navigate("map") },
-                onBrowseItemsSelected = { navController.navigate("available_items") }
+                onBrowseItemsSelected = { navController.navigate("available_items") },
+                onViewRequestsSelected = { navController.navigate("requested_items") }
             )
         }
         composable("available_items") {
             AvailableItemsScreen(
+                onBack = { navController.popBackStack() },
+                requestLocationPermission = requestLocationPermission
+            )
+        }
+        composable("requested_items") {
+            RequestedItemsScreen(
                 onBack = { navController.popBackStack() },
                 requestLocationPermission = requestLocationPermission
             )
@@ -131,6 +139,7 @@ fun AppNavigation(
                         popUpTo("selection") 
                     }
                 },
+                onBack = { navController.popBackStack() },
                 requestLocationPermission = requestLocationPermission
             )
         }
@@ -148,6 +157,7 @@ fun AppNavigation(
                         popUpTo("selection")
                     }
                 },
+                onBack = { navController.popBackStack() },
                 requestLocationPermission = requestLocationPermission
             )
         }

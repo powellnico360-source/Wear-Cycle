@@ -19,33 +19,33 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chichi.project.ProjectApplication
-import com.chichi.project.models.Donation
+import com.chichi.project.models.ClothesRequest
 import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AvailableItemsScreen(onBack: () -> Unit, requestLocationPermission: () -> Unit) {
-    var donations by remember { mutableStateOf<List<Donation>>(emptyList()) }
+fun RequestedItemsScreen(onBack: () -> Unit, requestLocationPermission: () -> Unit) {
+    var requests by remember { mutableStateOf<List<ClothesRequest>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
-    var selectedDonationId by remember { mutableStateOf<Int?>(null) }
+    var selectedRequestId by remember { mutableStateOf<Int?>(null) }
     var showSuccessDialog by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
-    val mockDonations = listOf(
-        Donation(id = -1, description = "Warm Winter Blanket", size = "Large", quantity = "1", donor_email = "Community Hub", phone_number = "0700000000"),
-        Donation(id = -2, description = "Box of Kids Socks", size = "Mixed", quantity = "12 pairs", donor_email = "Wear-Cycle Team", phone_number = "0711111111"),
-        Donation(id = -3, description = "Assorted Men's T-shirts", size = "Medium/Large", quantity = "5", donor_email = "Donation Center", phone_number = "0722222222")
+    val mockRequests = listOf(
+        ClothesRequest(id = -1, description = "Warm sweater for 5yr old", size = "Age 5-6", quantity = "1", requester_email = "Local Shelter", phone_number = "0733333333"),
+        ClothesRequest(id = -2, description = "Men's formal shoes", size = "Size 42", quantity = "1 pair", requester_email = "Job Seeker Support", phone_number = "0744444444"),
+        ClothesRequest(id = -3, description = "School uniform (Blue)", size = "Small", quantity = "2 sets", requester_email = "Primary School", phone_number = "0755555555")
     )
 
     LaunchedEffect(Unit) {
         requestLocationPermission()
         try {
-            val response = ProjectApplication.supabase.postgrest["donations"]
-                .select().decodeList<Donation>()
-            donations = mockDonations + response
+            val response = ProjectApplication.supabase.postgrest["requests"]
+                .select().decodeList<ClothesRequest>()
+            requests = mockRequests + response
         } catch (e: Exception) {
-            donations = mockDonations
+            requests = mockRequests
             e.printStackTrace()
         } finally {
             isLoading = false
@@ -55,16 +55,16 @@ fun AvailableItemsScreen(onBack: () -> Unit, requestLocationPermission: () -> Un
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Available Items") },
+                title = { Text("Requested Items") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    titleContentColor = MaterialTheme.colorScheme.onSecondary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onSecondary
                 )
             )
         }
@@ -80,15 +80,15 @@ fun AvailableItemsScreen(onBack: () -> Unit, requestLocationPermission: () -> Un
             }
 
             Text(
-                text = "Browse items donated by the community.",
+                text = "See what the community is looking for.",
                 modifier = Modifier.padding(16.dp),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
             )
 
-            if (donations.isEmpty() && !isLoading) {
+            if (requests.isEmpty() && !isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("No items available at the moment.")
+                    Text("No requests at the moment.")
                 }
             }
 
@@ -97,17 +97,17 @@ fun AvailableItemsScreen(onBack: () -> Unit, requestLocationPermission: () -> Un
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(donations) { donation ->
-                    DonationItemCard(
-                        donation = donation,
-                        isSelected = selectedDonationId == donation.id,
+                items(requests) { request ->
+                    RequestItemCard(
+                        clothesRequest = request,
+                        isSelected = selectedRequestId == request.id,
                         onSelect = {
-                            if (selectedDonationId == null) {
-                                selectedDonationId = donation.id
+                            if (selectedRequestId == null) {
+                                selectedRequestId = request.id
                                 showSuccessDialog = true
                             }
                         },
-                        isDisabled = selectedDonationId != null && selectedDonationId != donation.id
+                        isDisabled = selectedRequestId != null && selectedRequestId != request.id
                     )
                 }
             }
@@ -115,11 +115,11 @@ fun AvailableItemsScreen(onBack: () -> Unit, requestLocationPermission: () -> Un
     }
 
     if (showSuccessDialog) {
-        val selectedDonation = donations.find { it.id == selectedDonationId }
-        val dialogText = if (selectedDonation != null && (selectedDonation.id ?: 0) < 0) {
-            "You have successfully selected: ${selectedDonation.description}. Please collect it from the nearest collection point. Check the map for locations!"
+        val selectedRequest = requests.find { it.id == selectedRequestId }
+        val dialogText = if (selectedRequest != null && (selectedRequest.id ?: 0) < 0) {
+            "You have chosen to help with: ${selectedRequest.description}. Please deliver it to the nearest collection point. Check the map for locations!"
         } else {
-            "You have successfully selected: ${selectedDonation?.description}. You can find the donor's location on the map."
+            "You have chosen to help with: ${selectedRequest?.description}. You can find the requester's location on the map."
         }
         
         AlertDialog(
@@ -129,7 +129,7 @@ fun AvailableItemsScreen(onBack: () -> Unit, requestLocationPermission: () -> Un
                     Text("OK")
                 }
             },
-            title = { Text("Item Reserved!") },
+            title = { Text("Thank You for Helping!") },
             text = { Text(dialogText) },
             icon = { Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color.Green) }
         )
@@ -137,8 +137,8 @@ fun AvailableItemsScreen(onBack: () -> Unit, requestLocationPermission: () -> Un
 }
 
 @Composable
-fun DonationItemCard(
-    donation: Donation,
+fun RequestItemCard(
+    clothesRequest: ClothesRequest,
     isSelected: Boolean,
     onSelect: () -> Unit,
     isDisabled: Boolean
@@ -147,7 +147,7 @@ fun DonationItemCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface
+            containerColor = if (isSelected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
@@ -160,30 +160,30 @@ fun DonationItemCard(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = donation.description,
+                    text = clothesRequest.description,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Donor: ${donation.donor_email}",
+                    text = "Requested by: ${clothesRequest.requester_email}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
                 Text(
-                    text = "Phone: ${donation.phone_number}",
+                    text = "Phone: ${clothesRequest.phone_number}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Badge(containerColor = MaterialTheme.colorScheme.secondaryContainer) {
-                        Text("Size: ${donation.size}", modifier = Modifier.padding(horizontal = 4.dp))
+                        Text("Size: ${clothesRequest.size}", modifier = Modifier.padding(horizontal = 4.dp))
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Badge(containerColor = MaterialTheme.colorScheme.tertiaryContainer) {
-                        Text("Qty: ${donation.quantity}", modifier = Modifier.padding(horizontal = 4.dp))
+                        Text("Qty: ${clothesRequest.quantity}", modifier = Modifier.padding(horizontal = 4.dp))
                     }
-                    if (donation.latitude != null) {
+                    if (clothesRequest.latitude != null) {
                         Spacer(modifier = Modifier.width(8.dp))
                         Icon(Icons.Default.LocationOn, contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.primary)
                         Text("Location shared", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
@@ -196,10 +196,10 @@ fun DonationItemCard(
                 enabled = !isDisabled && !isSelected,
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isSelected) Color.Gray else MaterialTheme.colorScheme.primary
+                    containerColor = if (isSelected) Color.Gray else MaterialTheme.colorScheme.secondary
                 )
             ) {
-                Text(if (isSelected) "Select" else "Select")
+                Text("Help")
             }
         }
     }

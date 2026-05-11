@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
@@ -16,6 +18,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -42,6 +46,28 @@ fun SignUpScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
+
+    fun handleSignUp() {
+        if (name.isEmpty() || email.isEmpty() || password.isEmpty() || password != confirmPassword || isLoading) return
+        scope.launch {
+            isLoading = true
+            errorMessage = null
+            try {
+                ProjectApplication.supabase.auth.signUpWith(Email) {
+                    this.email = email
+                    this.password = password
+                }
+                onSignUpSuccess()
+            } catch (e: Exception) {
+                val message = e.localizedMessage ?: "Sign up failed"
+                if (!message.contains("weak", ignoreCase = true)) {
+                    errorMessage = message
+                }
+            } finally {
+                isLoading = false
+            }
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -101,7 +127,9 @@ fun SignUpScreen(
                 leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !isLoading,
-                shape = RoundedCornerShape(12.dp)
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
             )
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -112,7 +140,12 @@ fun SignUpScreen(
                 leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !isLoading,
-                shape = RoundedCornerShape(12.dp)
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Email,
+                    imeAction = ImeAction.Next
+                )
             )
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -124,7 +157,12 @@ fun SignUpScreen(
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !isLoading,
-                shape = RoundedCornerShape(12.dp)
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Next
+                )
             )
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -136,31 +174,20 @@ fun SignUpScreen(
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !isLoading,
-                shape = RoundedCornerShape(12.dp)
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = { handleSignUp() }
+                )
             )
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = {
-                    scope.launch {
-                        isLoading = true
-                        errorMessage = null
-                        try {
-                            ProjectApplication.supabase.auth.signUpWith(Email) {
-                                this.email = email
-                                this.password = password
-                            }
-                            onSignUpSuccess()
-                        } catch (e: Exception) {
-                            val message = e.localizedMessage ?: "Sign up failed"
-                            if (!message.contains("weak", ignoreCase = true)) {
-                                errorMessage = message
-                            }
-                        } finally {
-                            isLoading = false
-                        }
-                    }
-                },
+                onClick = { handleSignUp() },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),

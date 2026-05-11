@@ -3,6 +3,8 @@ package com.chichi.project.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
@@ -13,6 +15,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -25,6 +29,12 @@ fun ForgotPasswordScreen(
 ) {
     var email by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
+
+    fun handleReset() {
+        if (email.isNotEmpty() && !isLoading) {
+            // Handle reset logic
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -90,13 +100,21 @@ fun ForgotPasswordScreen(
                     leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
-                    enabled = !isLoading
+                    enabled = !isLoading,
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Email,
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = { handleReset() }
+                    )
                 )
                 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Button(
-                    onClick = { /* Handle reset logic */ },
+                    onClick = { handleReset() },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),

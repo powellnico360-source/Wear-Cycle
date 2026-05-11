@@ -30,7 +30,8 @@ fun SelectionScreen(
     onDonateSelected: () -> Unit,
     onRequestSelected: () -> Unit,
     onViewMapSelected: () -> Unit,
-    onBrowseItemsSelected: () -> Unit
+    onBrowseItemsSelected: () -> Unit,
+    onViewRequestsSelected: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -109,6 +110,17 @@ fun SelectionScreen(
                 onClick = onBrowseItemsSelected,
                 containerColor = MaterialTheme.colorScheme.tertiary,
                 contentColor = MaterialTheme.colorScheme.onTertiary
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            SelectionCard(
+                title = "View Requests",
+                subtitle = "See what others need",
+                imageUrl = "https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?q=80&w=500&auto=format&fit=crop",
+                onClick = onViewRequestsSelected,
+                containerColor = Color(0xFF6750A4),
+                contentColor = Color.White
             )
 
             Spacer(modifier = Modifier.height(24.dp))

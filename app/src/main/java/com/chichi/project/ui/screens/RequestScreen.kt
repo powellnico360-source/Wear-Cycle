@@ -3,10 +3,15 @@ package com.chichi.project.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Height
 import androidx.compose.material.icons.filled.Label
+import androidx.compose.material.icons.filled.Numbers
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -14,6 +19,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import android.annotation.SuppressLint
 import androidx.compose.ui.platform.LocalContext
 import com.google.android.gms.location.LocationServices
@@ -31,14 +38,54 @@ import kotlinx.coroutines.tasks.await
 @SuppressLint("MissingPermission")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RequestScreen(onRequestSubmitted: () -> Unit, requestLocationPermission: () -> Unit) {
+fun RequestScreen(onRequestSubmitted: () -> Unit, onBack: () -> Unit, requestLocationPermission: () -> Unit) {
     var description by remember { mutableStateOf("") }
     var size by remember { mutableStateOf("") }
+    var quantity by remember { mutableStateOf("") }
+    var phoneNumber by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
+
+    fun handleSubmit() {
+        if (description.isEmpty() || size.isEmpty() || quantity.isEmpty() || phoneNumber.isEmpty() || isLoading) return
+        
+        scope.launch {
+            isLoading = true
+            errorMessage = null
+            try {
+                val user = ProjectApplication.supabase.auth.currentUserOrNull()
+                val email = user?.email ?: "anonymous"
+                
+                val location = try {
+                    fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null).await()
+                        ?: fusedLocationClient.lastLocation.await()
+                } catch (e: Exception) {
+                    null
+                }
+
+                val request = ClothesRequest(
+                    description = description,
+                    size = size,
+                    quantity = quantity,
+                    requester_email = email,
+                    phone_number = phoneNumber,
+                    latitude = location?.latitude,
+                    longitude = location?.longitude
+                )
+                
+                ProjectApplication.supabase.postgrest["requests"].insert(request)
+                onRequestSubmitted()
+            } catch (e: Exception) {
+                errorMessage = e.message ?: "Failed to submit request"
+                e.printStackTrace()
+            } finally {
+                isLoading = false
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
         requestLocationPermission()
@@ -49,7 +96,7 @@ fun RequestScreen(onRequestSubmitted: () -> Unit, requestLocationPermission: () 
             TopAppBar(
                 title = { Text("Request Clothes") },
                 navigationIcon = {
-                    IconButton(onClick = onRequestSubmitted) {
+                    IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
@@ -103,7 +150,9 @@ fun RequestScreen(onRequestSubmitted: () -> Unit, requestLocationPermission: () 
                             leadingIcon = { Icon(Icons.Default.ShoppingBag, contentDescription = null) },
                             modifier = Modifier.fillMaxWidth(),
                             enabled = !isLoading,
-                            shape = RoundedCornerShape(12.dp)
+                            singleLine = true,
+                            shape = RoundedCornerShape(12.dp),
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
                         )
                         Spacer(modifier = Modifier.height(12.dp))
 
@@ -111,10 +160,48 @@ fun RequestScreen(onRequestSubmitted: () -> Unit, requestLocationPermission: () 
                             value = size,
                             onValueChange = { size = it },
                             label = { Text("Size (e.g. Medium, Age 5)") },
-                            leadingIcon = { Icon(Icons.Default.Label, contentDescription = null) },
+                            leadingIcon = { Icon(Icons.Default.Height, contentDescription = null) },
                             modifier = Modifier.fillMaxWidth(),
                             enabled = !isLoading,
-                            shape = RoundedCornerShape(12.dp)
+                            singleLine = true,
+                            shape = RoundedCornerShape(12.dp),
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        OutlinedTextField(
+                            value = quantity,
+                            onValueChange = { quantity = it },
+                            label = { Text("Quantity Needed (e.g. 2)") },
+                            leadingIcon = { Icon(Icons.Default.Numbers, contentDescription = null) },
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = !isLoading,
+                            singleLine = true,
+                            shape = RoundedCornerShape(12.dp),
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Number,
+                                imeAction = ImeAction.Next
+                            )
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        OutlinedTextField(
+                            value = phoneNumber,
+                            onValueChange = { phoneNumber = it },
+                            label = { Text("Phone Number") },
+                            placeholder = { Text("e.g. 0712345678") },
+                            leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null) },
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = !isLoading,
+                            singleLine = true,
+                            shape = RoundedCornerShape(12.dp),
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Phone,
+                                imeAction = ImeAction.Done
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onDone = { handleSubmit() }
+                            )
                         )
                     }
                 }
@@ -122,43 +209,11 @@ fun RequestScreen(onRequestSubmitted: () -> Unit, requestLocationPermission: () 
                 Spacer(modifier = Modifier.weight(1f))
 
                 Button(
-                    onClick = {
-                        scope.launch {
-                            isLoading = true
-                            errorMessage = null
-                            try {
-                                val user = ProjectApplication.supabase.auth.currentUserOrNull()
-                                val email = user?.email ?: "anonymous"
-                                
-                                val location = try {
-                                    fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null).await()
-                                        ?: fusedLocationClient.lastLocation.await()
-                                } catch (e: Exception) {
-                                    null
-                                }
-
-                                val request = ClothesRequest(
-                                    description = description,
-                                    size = size,
-                                    requester_email = email,
-                                    latitude = location?.latitude,
-                                    longitude = location?.longitude
-                                )
-                                
-                                ProjectApplication.supabase.postgrest["requests"].insert(request)
-                                onRequestSubmitted()
-                            } catch (e: Exception) {
-                                errorMessage = e.message ?: "Failed to submit request"
-                                e.printStackTrace()
-                            } finally {
-                                isLoading = false
-                            }
-                        }
-                    },
+                    onClick = { handleSubmit() },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
-                    enabled = description.isNotEmpty() && size.isNotEmpty() && !isLoading,
+                    enabled = description.isNotEmpty() && size.isNotEmpty() && quantity.isNotEmpty() && phoneNumber.isNotEmpty() && !isLoading,
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     if (isLoading) {
@@ -175,5 +230,5 @@ fun RequestScreen(onRequestSubmitted: () -> Unit, requestLocationPermission: () 
 @Preview
 @Composable
 private fun RequestScreenPreview() {
-    RequestScreen(onRequestSubmitted = {}, requestLocationPermission = {})
+    RequestScreen(onRequestSubmitted = {}, onBack = {}, requestLocationPermission = {})
 }

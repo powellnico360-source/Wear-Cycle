@@ -6,11 +6,7 @@ plugins {
 
 android {
     namespace = "com.chichi.project"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.chichi.project"
@@ -66,10 +62,9 @@ dependencies {
     implementation(libs.storage.kt)
     implementation(libs.ktor.client.android)
 
-    implementation(libs.maps.compose)
-    implementation(libs.play.services.maps)
-    implementation(libs.play.services.location)
-    implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.coil.compose)
+    implementation(libs.osmdroid.android)
+    implementation(libs.play.services.location)
+    implementation(libs.kotlinx.coroutines.play.services)
 }

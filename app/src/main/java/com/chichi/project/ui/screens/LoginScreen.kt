@@ -5,16 +5,18 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Recycling
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,6 +40,25 @@ fun LoginScreen(
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
+
+    fun handleLogin() {
+        if (email.isEmpty() || password.isEmpty() || isLoading) return
+        scope.launch {
+            isLoading = true
+            errorMessage = null
+            try {
+                ProjectApplication.supabase.auth.signInWith(Email) {
+                    this.email = email
+                    this.password = password
+                }
+                onLoginSuccess()
+            } catch (e: Exception) {
+                errorMessage = e.localizedMessage ?: "Login failed"
+            } finally {
+                isLoading = false
+            }
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -97,7 +118,12 @@ fun LoginScreen(
                 leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !isLoading,
-                shape = RoundedCornerShape(12.dp)
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Email,
+                    imeAction = ImeAction.Next
+                )
             )
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -109,7 +135,15 @@ fun LoginScreen(
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !isLoading,
-                shape = RoundedCornerShape(12.dp)
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = { handleLogin() }
+                )
             )
             
             Row(
@@ -122,23 +156,7 @@ fun LoginScreen(
             }
 
             Button(
-                onClick = {
-                    scope.launch {
-                        isLoading = true
-                        errorMessage = null
-                        try {
-                            ProjectApplication.supabase.auth.signInWith(Email) {
-                                this.email = email
-                                this.password = password
-                            }
-                            onLoginSuccess()
-                        } catch (e: Exception) {
-                            errorMessage = e.localizedMessage ?: "Login failed"
-                        } finally {
-                            isLoading = false
-                        }
-                    }
-                },
+                onClick = { handleLogin() },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
