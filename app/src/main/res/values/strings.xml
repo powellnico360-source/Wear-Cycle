@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">PROJECT</string>
+    <string name="app_name">Wear Cycle</string>
+    <string name="custom_label">Sustainable Fashion for Everyone</string>
 </resources>

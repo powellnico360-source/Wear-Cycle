@@ -25,7 +25,7 @@ import com.chichi.project.ui.screens.SelectionScreen
 import com.chichi.project.ui.screens.SignUpScreen
 import com.chichi.project.ui.screens.SplashScreen
 import com.chichi.project.ui.screens.SuccessScreen
-import com.chichi.project.ui.theme.PROJECTTheme
+import com.chichi.project.ui.theme.WearCycleTheme
 
 class MainActivity : ComponentActivity() {
     private val locationPermissionRequest = registerForActivityResult(
@@ -49,7 +49,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            PROJECTTheme {
+            WearCycleTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     AppNavigation(
                         modifier = Modifier.padding(innerPadding),

@@ -22,6 +22,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "PROJECT"
+rootProject.name = "Wear Cycle"
 include(":app")
  
